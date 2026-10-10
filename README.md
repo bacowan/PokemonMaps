@@ -2,7 +2,9 @@
 ## Manual through QGIS
 1. Download layers through QuickOSM Plugin
 2. Make sure that layers are projected with EPSG:6677
-3. 
+3. Create a raster layer. Set its data type to byte
+4. For each layer, project it to the raster layer (Processing toolbox -> Rasterize (Overwrite with Fixed Value)) and use a new value for each
+5. Map flags to values (right click on raster layer -> properties -> symbology -> classify)
 
 # Details
 ## Finding features to download
