@@ -11,7 +11,8 @@ data/layouts/layouts.json.
 
 Outputs, per tileset, in <out>/<path under data/tilesets>/:
   metatiles.png      - all metatiles, both layers composited
-  tiles_palNN.png    - (with --tile-sheets) the raw tile sheet in palette NN
+  tiles_palNN.png    - (with --tile-sheets) the raw tile sheet in palette NN, for
+                       each palette the tileset's metatiles use with its tiles
 
 Usage:
   py -m pip install pillow
@@ -154,8 +155,12 @@ def draw_tile(img, tile, palette, ox, oy, hflip, vflip, transparent):
             px[ox + dx, oy + dy] = palette[index]
 
 
-def render_metatiles(tileset, primary):
-    """Render all metatiles of `tileset`. `primary` is the paired primary (None for primaries)."""
+def combined_graphics(tileset, primary):
+    """Return the (tiles, palettes) the game has loaded while `tileset` is in use.
+
+    `primary` is the paired primary (None for primaries). Tile and palette
+    indices in metatiles.bin index into these lists.
+    """
     if primary is None:
         tiles = tileset.tiles
         palettes = tileset.palettes[:NUM_PALS_IN_PRIMARY]
@@ -164,6 +169,27 @@ def render_metatiles(tileset, primary):
         tiles = tiles + [[0] * 64] * (NUM_TILES_IN_PRIMARY - len(tiles)) + tileset.tiles
         palettes = primary.palettes[:NUM_PALS_IN_PRIMARY] + tileset.palettes[NUM_PALS_IN_PRIMARY:]
     palettes = palettes + [[(255, 0, 255)] * 16] * (16 - len(palettes))
+    return tiles, palettes
+
+
+def own_tile_palettes(tileset):
+    """Return the palette indices `tileset`'s metatiles use with `tileset`'s own tiles.
+
+    Blank or out-of-range tiles are ignored; some metatiles.bin files point those
+    at unused palettes, and they look the same in any palette anyway.
+    """
+    offset = NUM_TILES_IN_PRIMARY if tileset.is_secondary else 0
+    used = set()
+    for entry in tileset.metatiles:
+        tile_index = (entry & 0x3FF) - offset
+        if 0 <= tile_index < len(tileset.tiles) and any(tileset.tiles[tile_index]):
+            used.add(entry >> 12)
+    return sorted(used)
+
+
+def render_metatiles(tileset, primary):
+    """Render all metatiles of `tileset`. `primary` is the paired primary (None for primaries)."""
+    tiles, palettes = combined_graphics(tileset, primary)
     blank = [0] * 64
 
     count = len(tileset.metatiles) // 8
@@ -200,7 +226,7 @@ def main():
     parser.add_argument("--cache", type=Path, default=Path(".cache/pokeemerald"))
     parser.add_argument("--ref", default="master", help="git branch/tag/commit to download")
     parser.add_argument("--tile-sheets", action="store_true",
-                        help="also write the raw tile sheet once per palette")
+                        help="also write the raw tile sheet once per palette it is used with")
     args = parser.parse_args()
 
     dl = Downloader(args.ref, args.cache)
@@ -221,8 +247,9 @@ def main():
         out_dir.mkdir(parents=True, exist_ok=True)
         render_metatiles(tileset, primary).save(out_dir / "metatiles.png")
         if args.tile_sheets:
-            for i, palette in enumerate(tileset.palettes):
-                render_tile_sheet(tileset, palette).save(out_dir / f"tiles_pal{i:02}.png")
+            _, palettes = combined_graphics(tileset, primary)
+            for i in own_tile_palettes(tileset):
+                render_tile_sheet(tileset, palettes[i]).save(out_dir / f"tiles_pal{i:02}.png")
 
         paired = f" (with {primary.name})" if primary else ""
         print(f"  {tileset.name}{paired}")
