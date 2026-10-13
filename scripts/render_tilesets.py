@@ -11,12 +11,15 @@ data/layouts/layouts.json.
 
 Outputs, per tileset, in <out>/<path under data/tilesets>/:
   metatiles.png      - all metatiles, both layers composited
+  metatiles/XXX.png  - (with --split) each metatile as its own 16x16 image,
+                       named by its metatile ID in hex as the game numbers them
+                       (secondary tilesets start at 200)
   tiles_palNN.png    - (with --tile-sheets) the raw tile sheet in palette NN, for
                        each palette the tileset's metatiles use with its tiles
 
 Usage:
   py -m pip install pillow
-  py scripts/render_tilesets.py [--out output/tilesets] [--ref master]
+  py scripts/render_tilesets.py [--out output/tilesets] [--ref master] [--split] [--tile-sheets]
 """
 
 import argparse
@@ -35,6 +38,7 @@ REPO = "pret/pokeemerald"
 # From include/fieldmap.h
 NUM_TILES_IN_PRIMARY = 512
 NUM_PALS_IN_PRIMARY = 6
+NUM_METATILES_IN_PRIMARY = 512
 
 TILE = 8
 METATILE = 16
@@ -187,27 +191,31 @@ def own_tile_palettes(tileset):
     return sorted(used)
 
 
-def render_metatiles(tileset, primary):
-    """Render all metatiles of `tileset`. `primary` is the paired primary (None for primaries)."""
-    tiles, palettes = combined_graphics(tileset, primary)
+def render_metatile(tileset: Tileset, tiles: list[list[int]], palettes: list[list[tuple[int, int, int]]],
+                    m: int) -> Image.Image:
+    """Render metatile `m` of `tileset` using the loaded graphics from combined_graphics."""
     blank = [0] * 64
+    img = Image.new("RGB", (METATILE, METATILE), palettes[0][0])
+    # 8 entries: bottom layer TL, TR, BL, BR, then top layer TL, TR, BL, BR.
+    for i, entry in enumerate(tileset.metatiles[m * 8:m * 8 + 8]):
+        tile_index = entry & 0x3FF
+        tile = tiles[tile_index] if tile_index < len(tiles) else blank
+        draw_tile(img, tile, palettes[entry >> 12], (i % 2) * TILE, ((i // 2) % 2) * TILE,
+                  hflip=bool(entry & 0x400), vflip=bool(entry & 0x800), transparent=True)
+    return img
 
-    count = len(tileset.metatiles) // 8
-    rows = (count + METATILES_PER_ROW - 1) // METATILES_PER_ROW
-    backdrop = palettes[0][0]
+
+def render_metatiles(tileset: Tileset, tiles: list[list[int]],
+                     palettes: list[list[tuple[int, int, int]]]) -> list[Image.Image]:
+    """Render each metatile of `tileset` using the loaded graphics from combined_graphics."""
+    return [render_metatile(tileset, tiles, palettes, m) for m in range(len(tileset.metatiles) // 8)]
+
+
+def metatile_sheet(metatiles: list[Image.Image], backdrop: tuple[int, int, int]) -> Image.Image:
+    rows = (len(metatiles) + METATILES_PER_ROW - 1) // METATILES_PER_ROW
     img = Image.new("RGB", (METATILES_PER_ROW * METATILE, rows * METATILE), backdrop)
-
-    for m in range(count):
-        mx = (m % METATILES_PER_ROW) * METATILE
-        my = (m // METATILES_PER_ROW) * METATILE
-        # 8 entries: bottom layer TL, TR, BL, BR, then top layer TL, TR, BL, BR.
-        for i, entry in enumerate(tileset.metatiles[m * 8:m * 8 + 8]):
-            tile_index = entry & 0x3FF
-            tile = tiles[tile_index] if tile_index < len(tiles) else blank
-            ox = mx + (i % 2) * TILE
-            oy = my + ((i // 2) % 2) * TILE
-            draw_tile(img, tile, palettes[entry >> 12], ox, oy,
-                      hflip=bool(entry & 0x400), vflip=bool(entry & 0x800), transparent=True)
+    for m, metatile in enumerate(metatiles):
+        img.paste(metatile, ((m % METATILES_PER_ROW) * METATILE, (m // METATILES_PER_ROW) * METATILE))
     return img
 
 
@@ -227,6 +235,8 @@ def main():
     parser.add_argument("--ref", default="master", help="git branch/tag/commit to download")
     parser.add_argument("--tile-sheets", action="store_true",
                         help="also write the raw tile sheet once per palette it is used with")
+    parser.add_argument("--split", action="store_true",
+                        help="also write each metatile as its own image")
     args = parser.parse_args()
 
     dl = Downloader(args.ref, args.cache)
@@ -245,9 +255,16 @@ def main():
 
         out_dir = args.out / tileset.name
         out_dir.mkdir(parents=True, exist_ok=True)
-        render_metatiles(tileset, primary).save(out_dir / "metatiles.png")
+        tiles, palettes = combined_graphics(tileset, primary)
+        metatiles = render_metatiles(tileset, tiles, palettes)
+        metatile_sheet(metatiles, palettes[0][0]).save(out_dir / "metatiles.png")
+        if args.split:
+            split_dir = out_dir / "metatiles"
+            split_dir.mkdir(exist_ok=True)
+            first_id = NUM_METATILES_IN_PRIMARY if tileset.is_secondary else 0
+            for m, metatile in enumerate(metatiles):
+                metatile.save(split_dir / f"{first_id + m:03X}.png")
         if args.tile_sheets:
-            _, palettes = combined_graphics(tileset, primary)
             for i in own_tile_palettes(tileset):
                 render_tile_sheet(tileset, palettes[i]).save(out_dir / f"tiles_pal{i:02}.png")
 
