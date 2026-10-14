@@ -19,7 +19,8 @@ import numpy as np
 import rasterio
 from rasterio.profiles import Profile
 
-from render import Tile, render
+from render import render
+from tile import Tile
 
 
 def save(tiles: list[list[Tile]], profile: Profile, out: Path) -> None:

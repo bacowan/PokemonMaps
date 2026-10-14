@@ -1,0 +1,18 @@
+"""The set of Pokemon map tiles a raster can be classified into."""
+
+from enum import IntEnum
+
+
+class Tile(IntEnum):
+    GRASS_CENTER = 0
+    OCEAN_CENTER = 1
+    GRASS_BELOW_OCEAN = 2
+    OCEAN_BELOW_GRASS = 3
+    OCEAN_LEFT_OF_GRASS = 4
+    OCEAN_LEFT_OF_GRASS_CORNER = 5
+    OCEAN_RIGHT_OF_GRASS = 6
+    OCEAN_RIGHT_OF_GRASS_CORNER = 7
+    OCEAN_BELOW_RIGHT_OF_GRASS = 8
+    OCEAN_BELOW_LEFT_OF_GRASS = 9
+    OCEAN_BELOW_RIGHT_OF_GRASS_CORNER = 10
+    OCEAN_BELOW_LEFT_OF_GRASS_CORNER = 11
