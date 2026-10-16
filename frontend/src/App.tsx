@@ -1,21 +1,20 @@
 import { useEffect, useState } from 'react'
+import TileMap, { type MapData } from './TileMap'
 
 function App() {
-  const [message, setMessage] = useState('Loading...')
+  const [map, setMap] = useState<MapData | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch('/api/hello')
+    fetch('/api/map?width=100&height=100')
       .then((res) => res.json())
-      .then((data: { message: string }) => setMessage(data.message))
-      .catch(() => setMessage('Could not reach backend'))
+      .then(setMap)
+      .catch(() => setError('Could not reach backend'))
   }, [])
 
-  return (
-    <main>
-      <h1>Hello, world!</h1>
-      <p>{message}</p>
-    </main>
-  )
+  if (error) return <p>{error}</p>
+  if (!map) return <p>Loading...</p>
+  return <TileMap map={map} />
 }
 
 export default App
