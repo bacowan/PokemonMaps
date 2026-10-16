@@ -8,8 +8,8 @@ TILES_JSON = Path(__file__).with_name("tiles.json")
 
 
 class Tile(IntEnum):
-    GRASS_CENTER = 0
-    OCEAN_CENTER = 1
+    OCEAN_CENTER = 0
+    GRASS_CENTER = 1
     GRASS_BELOW_OCEAN = 2
     OCEAN_BELOW_GRASS = 3
     OCEAN_LEFT_OF_GRASS = 4
