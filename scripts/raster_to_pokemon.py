@@ -1,6 +1,6 @@
 """Convert a raster map (GeoTIFF) into a Pokemon-style map.
 
-The raster is rendered into a 2D grid of Tile values, one per raster pixel,
+The raster is turned into a 2D grid of Tile values, one per raster pixel,
 which is then written next to each other as:
   <out>.json  - grid size, tile legend and source georeferencing
   <out>.bin   - the tile grid, one uint8 per tile, row-major
@@ -19,7 +19,7 @@ import numpy as np
 import rasterio
 from rasterio.profiles import Profile
 
-from render import render
+from tilemap import generate_tilemap
 from tile import Tile
 
 
@@ -64,7 +64,7 @@ def main() -> None:
         parser.error(f"input file not found: {args.tif}")
 
     with rasterio.open(args.tif) as dataset:
-        tiles = render(dataset)
+        tiles = generate_tilemap(dataset)
         profile = dataset.profile
 
     save(tiles, profile, args.out)
