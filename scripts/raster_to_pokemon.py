@@ -19,7 +19,7 @@ import numpy as np
 import rasterio
 from rasterio.profiles import Profile
 
-from tilemap import generate_tilemap
+from map_tiles import generate_tilemap
 from tile import Tile
 
 
