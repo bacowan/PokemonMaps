@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export interface MapData {
   width: number
@@ -18,28 +18,39 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 
 function TileMap({ map }: { map: MapData }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
+    setError(null)
     const unique = [...new Set(map.tiles)]
 
-    Promise.all(unique.map((t) => loadImage(`/api/tilesets/${t}`))).then(
-      (images) => {
-        const ctx = canvasRef.current?.getContext('2d')
-        if (cancelled || !ctx) return
-        const byPath = new Map(unique.map((t, i) => [t, images[i]]))
-        map.tiles.forEach((tile, i) => {
-          const x = (i % map.width) * map.tileSize
-          const y = Math.floor(i / map.width) * map.tileSize
-          ctx.drawImage(byPath.get(tile)!, x, y)
-        })
-      },
-    )
+    const draw = async () => {
+      let images: HTMLImageElement[]
+      try {
+        images = await Promise.all(
+          unique.map((t) => loadImage(`/api/tilesets/${t}`)),
+        )
+      } catch {
+        if (!cancelled) setError('Could not load tiles')
+        return
+      }
+      const ctx = canvasRef.current?.getContext('2d')
+      if (cancelled || !ctx) return
+      const byPath = new Map(unique.map((t, i) => [t, images[i]]))
+      map.tiles.forEach((tile, i) => {
+        const x = (i % map.width) * map.tileSize
+        const y = Math.floor(i / map.width) * map.tileSize
+        ctx.drawImage(byPath.get(tile)!, x, y)
+      })
+    }
+    draw()
     return () => {
       cancelled = true
     }
   }, [map])
 
+  if (error) return <p>{error}</p>
   return (
     <canvas
       ref={canvasRef}

@@ -6,10 +6,15 @@ function App() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch('/api/map?width=100&height=100')
-      .then((res) => res.json())
-      .then(setMap)
-      .catch(() => setError('Could not reach backend'))
+    const loadMap = async () => {
+      try {
+        const res = await fetch('/api/map?width=100&height=100')
+        setMap(await res.json())
+      } catch {
+        setError('Could not reach backend')
+      }
+    }
+    loadMap()
   }, [])
 
   if (error) return <p>{error}</p>

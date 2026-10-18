@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 
 const app = express();
 const port = Number(process.env.PORT ?? 3001);
+const isProd = process.env.NODE_ENV === "production";
 
 const tilesetsDir = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -12,7 +13,10 @@ const tilesetsDir = path.resolve(
 );
 const metatilesDir = path.join(tilesetsDir, "primary/general/metatiles");
 
-app.use("/api/tilesets", express.static(tilesetsDir));
+app.use(
+  "/api/tilesets",
+  express.static(tilesetsDir, { maxAge: isProd ? "1d" : 0 }),
+);
 
 app.get("/api/hello", (_req, res) => {
   res.json({ message: "Hello from Express!" });
