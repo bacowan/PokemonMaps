@@ -9,6 +9,15 @@ canvas {
   display: block;
 }
 
+.map-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  /* Let pan/zoom input reach the transform wrapper underneath. */
+  pointer-events: none;
+}
+
 .map-controls {
   position: fixed;
   top: 12px;

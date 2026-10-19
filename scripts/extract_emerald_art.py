@@ -19,7 +19,7 @@ Outputs, per tileset, in <out>/<path under data/tilesets>/:
 
 Usage:
   py -m pip install pillow
-  py scripts/extract_emerald_art.py [--out output/emerald_art] [--ref master] [--split] [--tile-sheets]
+  py scripts/extract_emerald_art.py [--out output/tilesets] [--ref master] [--split] [--tile-sheets]
 """
 
 import argparse
@@ -230,7 +230,7 @@ def render_tile_sheet(tileset, palette):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--out", type=Path, default=Path("output/emerald_art"))
+    parser.add_argument("--out", type=Path, default=Path("output/tilesets"))
     parser.add_argument("--cache", type=Path, default=Path(".cache/pokeemerald"))
     parser.add_argument("--ref", default="master", help="git branch/tag/commit to download")
     parser.add_argument("--tile-sheets", action="store_true",
