@@ -8,3 +8,28 @@ body {
 canvas {
   display: block;
 }
+
+.map-controls {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.map-controls button {
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+  line-height: 1;
+  color: inherit;
+  background: #2a2c36;
+  border: 1px solid #44475a;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.map-controls button:hover {
+  background: #3a3d4a;
+}

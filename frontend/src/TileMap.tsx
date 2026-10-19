@@ -1,4 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
+import {
+  TransformComponent,
+  TransformWrapper,
+  useControls,
+} from 'react-zoom-pan-pinch'
 
 export interface MapData {
   width: number
@@ -14,6 +19,17 @@ function loadImage(src: string): Promise<HTMLImageElement> {
     img.onerror = reject
     img.src = src
   })
+}
+
+function MapControls() {
+  const { zoomIn, zoomOut, fitToView } = useControls()
+  return (
+    <div className="map-controls">
+      <button onClick={() => zoomIn()} title="Zoom in">+</button>
+      <button onClick={() => zoomOut()} title="Zoom out">−</button>
+      <button onClick={() => fitToView()} title="Fit map to screen">⤢</button>
+    </div>
+  )
 }
 
 function TileMap({ map }: { map: MapData }) {
@@ -52,12 +68,24 @@ function TileMap({ map }: { map: MapData }) {
 
   if (error) return <p>{error}</p>
   return (
-    <canvas
-      ref={canvasRef}
-      width={map.width * map.tileSize}
-      height={map.height * map.tileSize}
-      style={{ imageRendering: 'pixelated' }}
-    />
+    <TransformWrapper
+      fitOnInit
+      minScale={0.1}
+      maxScale={16}
+      limitToBounds={false}
+      keyboard={{ disabled: false }}
+      doubleClick={{ mode: 'zoomIn' }}
+    >
+      <TransformComponent wrapperStyle={{ width: '100vw', height: '100vh' }}>
+        <canvas
+          ref={canvasRef}
+          width={map.width * map.tileSize}
+          height={map.height * map.tileSize}
+          style={{ imageRendering: 'pixelated' }}
+        />
+      </TransformComponent>
+      <MapControls />
+    </TransformWrapper>
   )
 }
 
