@@ -8,7 +8,7 @@ function App() {
   useEffect(() => {
     const loadMap = async () => {
       try {
-        const res = await fetch('/api/map?width=100&height=100')
+        const res = await fetch('/api/map')
         setMap(await res.json())
       } catch {
         setError('Could not reach backend')
