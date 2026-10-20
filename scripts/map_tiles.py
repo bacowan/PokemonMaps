@@ -5,6 +5,7 @@ from collections.abc import Sequence
 from rasterio.io import DatasetReader
 
 from stages.place_land import place_land
+from stages.place_sand import place_sand
 from tile import Tile
 from tilemap import Raster, Stage, Tilemap
 
@@ -17,6 +18,7 @@ def initial_tilemap(raster: Raster) -> Tilemap:
 
 STAGES: Sequence[Stage] = [
     place_land,
+    place_sand,
 ]
 
 

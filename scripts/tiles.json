@@ -10,5 +10,22 @@
   "OCEAN_BELOW_RIGHT_OF_GRASS": "output/tilesets/primary/general/metatiles/188.png",
   "OCEAN_BELOW_LEFT_OF_GRASS": "output/tilesets/primary/general/metatiles/18A.png",
   "OCEAN_BELOW_RIGHT_OF_GRASS_CORNER": "output/tilesets/primary/general/metatiles/198.png",
-  "OCEAN_BELOW_LEFT_OF_GRASS_CORNER": "output/tilesets/primary/general/metatiles/19A.png"
+  "OCEAN_BELOW_LEFT_OF_GRASS_CORNER": "output/tilesets/primary/general/metatiles/19A.png",
+  "SAND_CENTER": "output/tilesets/primary/general/metatiles/121.png",
+  "SAND_BELOW_GRASS": "output/tilesets/primary/general/metatiles/119.png",
+  "SAND_ABOVE_GRASS": "output/tilesets/primary/general/metatiles/129.png",
+  "SAND_RIGHT_OF_GRASS": "output/tilesets/primary/general/metatiles/120.png",
+  "SAND_LEFT_OF_GRASS": "output/tilesets/primary/general/metatiles/122.png",
+  "SAND_BELOW_RIGHT_OF_GRASS": "output/tilesets/primary/general/metatiles/118.png",
+  "SAND_BELOW_LEFT_OF_GRASS": "output/tilesets/primary/general/metatiles/11A.png",
+  "SAND_ABOVE_RIGHT_OF_GRASS": "output/tilesets/primary/general/metatiles/128.png",
+  "SAND_ABOVE_LEFT_OF_GRASS": "output/tilesets/primary/general/metatiles/12A.png",
+  "SAND_BELOW_OCEAN": "output/tilesets/primary/general/metatiles/11C.png",
+  "SAND_ABOVE_OCEAN": "output/tilesets/primary/general/metatiles/12C.png",
+  "SAND_RIGHT_OF_OCEAN": "output/tilesets/primary/general/metatiles/123.png",
+  "SAND_LEFT_OF_OCEAN": "output/tilesets/primary/general/metatiles/125.png",
+  "SAND_BELOW_RIGHT_OF_OCEAN": "output/tilesets/primary/general/metatiles/11B.png",
+  "SAND_BELOW_LEFT_OF_OCEAN": "output/tilesets/primary/general/metatiles/11D.png",
+  "SAND_ABOVE_RIGHT_OF_OCEAN": "output/tilesets/primary/general/metatiles/12B.png",
+  "SAND_ABOVE_LEFT_OF_OCEAN": "output/tilesets/primary/general/metatiles/12D.png"
 }
