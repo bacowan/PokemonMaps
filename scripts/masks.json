@@ -1,12 +1,25 @@
 {
   "OCEAN": [
-    [["*",    "*",                                "OCEAN"],
-     ["LAND", "OCEAN_CHANNEL_VERTICAL_NW_CORNER", "LAND" ],
-     ["*",    "*",                                "*"    ]],
 
     [["*",    "*",                      "*"   ],
      ["LAND", "OCEAN_CHANNEL_VERTICAL", "LAND"],
      ["*",    "*",                      "*"   ]],
+
+    [["*",    "*",                                "OCEAN"],
+     ["LAND", "OCEAN_CHANNEL_VERTICAL_NW_CORNER", "LAND" ],
+     ["*",    "*",                                "*"    ]],
+
+    [["*",    "*",                                "LAND"],
+     ["LAND", "OCEAN_CHANNEL_VERTICAL_NW_OUTER_CORNER", "SAND" ],
+     ["*",    "*",                                "*"    ]],
+
+    [["*",    "*",                                "LAND"],
+     ["LAND", "OCEAN_CHANNEL_VERTICAL_NW_OUTER_CORNER", "OCEAN" ],
+     ["*",    "*",                                "*"    ]],
+
+    [["*",    "*",                                "LAND"],
+     ["LAND", "OCEAN_CHANNEL_VERTICAL_NW_OUTER_CORNER", "LAND" ],
+     ["*",    "*",                                "OCEAN"    ]],
 
     [["*",    "LAND",                 "*"   ],
      ["LAND", "OCEAN_GRASS_NW_INNER", "*"   ],
