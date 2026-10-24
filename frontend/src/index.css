@@ -18,6 +18,22 @@ canvas {
   pointer-events: none;
 }
 
+.map-tooltip {
+  position: fixed;
+  padding: 4px 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: nowrap;
+  background: rgba(22, 23, 29, 0.9);
+  border: 1px solid #44475a;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.map-tooltip-cell {
+  color: #9ca3af;
+}
+
 .map-controls {
   position: fixed;
   top: 12px;

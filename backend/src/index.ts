@@ -33,6 +33,27 @@ if (grid.length !== render.width * render.height) {
   );
 }
 
+// render.cells.json holds per-cell metadata as one [row][col] grid per field.
+const cells: Record<string, unknown[][]> = JSON.parse(
+  readFileSync(path.join(renderDir, "render.cells.json"), "utf8"),
+);
+for (const [field, rows] of Object.entries(cells)) {
+  if (rows.length !== render.height || rows.some((row) => row.length !== render.width)) {
+    throw new Error(
+      `render.cells.json field "${field}" is not ${render.width}x${render.height}`,
+    );
+  }
+}
+
+// Clamps the x/y/width/height query parameters to the map.
+function queryRegion(query: Record<string, unknown>) {
+  const x0 = Math.max(0, Math.floor(Number(query.x ?? 0)));
+  const y0 = Math.max(0, Math.floor(Number(query.y ?? 0)));
+  const x1 = Math.min(render.width, x0 + Math.floor(Number(query.width ?? 0)));
+  const y1 = Math.min(render.height, y0 + Math.floor(Number(query.height ?? 0)));
+  return { x: x0, y: y0, width: Math.max(0, x1 - x0), height: Math.max(0, y1 - y0) };
+}
+
 // tiles.json image paths are relative to scripts/, e.g. "output/tilesets/...".
 app.use(
   "/api/output",
@@ -57,19 +78,27 @@ app.get("/api/map", (_req, res) => {
 });
 
 app.get("/api/map/tiles", (req, res) => {
-  const x0 = Math.max(0, Math.floor(Number(req.query.x ?? 0)));
-  const y0 = Math.max(0, Math.floor(Number(req.query.y ?? 0)));
-  const x1 = Math.min(render.width, x0 + Math.floor(Number(req.query.width ?? 0)));
-  const y1 = Math.min(render.height, y0 + Math.floor(Number(req.query.height ?? 0)));
-  const width = Math.max(0, x1 - x0);
-  const height = Math.max(0, y1 - y0);
-
+  const region = queryRegion(req.query);
   const tiles: number[] = [];
-  for (let y = y0; y < y0 + height; y++) {
+  for (let y = region.y; y < region.y + region.height; y++) {
     const row = y * render.width;
-    for (let x = x0; x < x0 + width; x++) tiles.push(grid[row + x]);
+    for (let x = region.x; x < region.x + region.width; x++) tiles.push(grid[row + x]);
   }
-  res.json({ x: x0, y: y0, width, height, tiles });
+  res.json({ ...region, tiles });
+});
+
+// Each metadata field is flattened row-major over the region, like tiles.
+app.get("/api/map/meta", (req, res) => {
+  const region = queryRegion(req.query);
+  const fields: Record<string, unknown[]> = {};
+  for (const [field, rows] of Object.entries(cells)) {
+    const values: unknown[] = [];
+    for (let y = region.y; y < region.y + region.height; y++) {
+      values.push(...rows[y].slice(region.x, region.x + region.width));
+    }
+    fields[field] = values;
+  }
+  res.json({ ...region, fields });
 });
 
 app.listen(port, () => {

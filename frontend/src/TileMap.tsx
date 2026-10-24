@@ -21,6 +21,23 @@ interface TileRegion {
   tiles: number[]
 }
 
+interface MetaRegion {
+  x: number
+  y: number
+  width: number
+  height: number
+  // Field name -> one value per cell, row-major over the region.
+  fields: Record<string, unknown[]>
+}
+
+// The cell under the pointer, and where on screen the pointer is.
+interface Hover {
+  x: number
+  y: number
+  clientX: number
+  clientY: number
+}
+
 interface View {
   scale: number
   positionX: number
@@ -35,6 +52,11 @@ const LOADED = 2
 const FETCH_DEBOUNCE_MS = 100
 // Screen pixels per map pixel on load; 3 shows ~40 tiles across a 1920px screen.
 const INITIAL_SCALE = 3
+// Debug mode (?debug=true) fetches per-cell metadata and draws grid lines.
+const DEBUG = new URLSearchParams(window.location.search).get('debug') === 'true'
+// Grid lines are hidden when tiles are smaller than this many screen pixels.
+const MIN_GRID_TILE_PX = 6
+const GRID_COLOR = 'rgba(0, 0, 0, 0.35)'
 
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -63,10 +85,14 @@ function TileMap({ map }: { map: MapData }) {
   const [error, setError] = useState<string | null>(null)
   const grid = useRef(new Uint8Array(0))
   const status = useRef(new Uint8Array(0))
+  // Field name -> value per map cell (row-major); filled alongside the grid.
+  const meta = useRef<Record<string, unknown[]>>({})
   const images = useRef<(HTMLImageElement | undefined)[]>([])
   const view = useRef<View | null>(null)
   const frame = useRef(0)
   const fetchTimer = useRef<number | undefined>(undefined)
+  const pointer = useRef<{ clientX: number; clientY: number } | null>(null)
+  const [hover, setHover] = useState<Hover | null>(null)
 
   const visibleRect = (v: View, screenWidth: number, screenHeight: number) => {
     const px = map.tileSize * v.scale
@@ -112,6 +138,38 @@ function TileMap({ map }: { map: MapData }) {
         ctx.drawImage(img, left, top, edgeX(x + 1) - left, tileHeight)
       }
     }
+
+    if (DEBUG && px >= MIN_GRID_TILE_PX && x1 > x0 && y1 > y0) {
+      // Offset by half a pixel so 1px lines land on whole device pixels.
+      ctx.beginPath()
+      for (let x = x0; x <= x1; x++) {
+        ctx.moveTo(edgeX(x) + 0.5, edgeY(y0))
+        ctx.lineTo(edgeX(x) + 0.5, edgeY(y1))
+      }
+      for (let y = y0; y <= y1; y++) {
+        ctx.moveTo(edgeX(x0), edgeY(y) + 0.5)
+        ctx.lineTo(edgeX(x1), edgeY(y) + 0.5)
+      }
+      ctx.lineWidth = 1
+      ctx.strokeStyle = GRID_COLOR
+      ctx.stroke()
+    }
+  }
+
+  // Points the tooltip at the cell under the last pointer position, which
+  // changes when either the pointer or the view moves.
+  const updateHover = () => {
+    const p = pointer.current
+    const v = view.current
+    if (!DEBUG || !p || !v) return
+    const px = map.tileSize * v.scale
+    const x = Math.floor((p.clientX - v.positionX) / px)
+    const y = Math.floor((p.clientY - v.positionY) / px)
+    if (x < 0 || y < 0 || x >= map.width || y >= map.height) {
+      setHover(null)
+      return
+    }
+    setHover({ x, y, clientX: p.clientX, clientY: p.clientY })
   }
 
   const scheduleDraw = () => {
@@ -132,6 +190,7 @@ function TileMap({ map }: { map: MapData }) {
     // Write into the arrays current at request time, in case the map changes.
     const regionGrid = grid.current
     const regionStatus = status.current
+    const regionMeta = meta.current
     let needed = false
     for (let y = y0; y < y1; y++) {
       for (let x = x0; x < x1; x++) {
@@ -150,11 +209,18 @@ function TileMap({ map }: { map: MapData }) {
       width: String(x1 - x0),
       height: String(y1 - y0),
     })
-    let region: TileRegion
-    try {
-      const res = await fetch(`/api/map/tiles?${params}`)
+    const fetchRegion = async <T,>(url: string): Promise<T> => {
+      const res = await fetch(url)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      region = await res.json()
+      return res.json()
+    }
+    let region: TileRegion
+    let metaRegion: MetaRegion | null
+    try {
+      ;[region, metaRegion] = await Promise.all([
+        fetchRegion<TileRegion>(`/api/map/tiles?${params}`),
+        DEBUG ? fetchRegion<MetaRegion>(`/api/map/meta?${params}`) : null,
+      ])
     } catch {
       for (let y = y0; y < y1; y++) {
         for (let x = x0; x < x1; x++) {
@@ -172,6 +238,16 @@ function TileMap({ map }: { map: MapData }) {
       regionGrid[i] = tile
       regionStatus[i] = LOADED
     })
+    if (metaRegion) {
+      const { x, y, width, fields } = metaRegion
+      for (const [field, values] of Object.entries(fields)) {
+        const cells = (regionMeta[field] ??= new Array(map.width * map.height))
+        values.forEach((value, n) => {
+          cells[(y + Math.floor(n / width)) * map.width + x + (n % width)] = value
+        })
+      }
+      updateHover()
+    }
     scheduleDraw()
   }
 
@@ -184,12 +260,14 @@ function TileMap({ map }: { map: MapData }) {
     view.current = v
     scheduleDraw()
     scheduleFetch()
+    updateHover()
   }
 
   useEffect(() => {
     let cancelled = false
     grid.current = new Uint8Array(map.width * map.height)
     status.current = new Uint8Array(map.width * map.height)
+    meta.current = {}
     images.current = []
     map.tileImages.forEach((src, id) => {
       loadImage(src).then(
@@ -209,8 +287,23 @@ function TileMap({ map }: { map: MapData }) {
       scheduleDraw()
       scheduleFetch()
     }
+    // The canvas fills the window, so client coordinates are canvas coordinates.
+    const onPointerMove = (e: PointerEvent) => {
+      pointer.current = { clientX: e.clientX, clientY: e.clientY }
+      updateHover()
+    }
+    // A pointerout with nowhere to go means the pointer left the window.
+    const onPointerOut = (e: PointerEvent) => {
+      if (e.relatedTarget) return
+      pointer.current = null
+      setHover(null)
+    }
     window.addEventListener('resize', scheduleDraw)
     window.addEventListener('resize', scheduleFetch)
+    if (DEBUG) {
+      window.addEventListener('pointermove', onPointerMove)
+      window.addEventListener('pointerout', onPointerOut)
+    }
     return () => {
       cancelled = true
       clearTimeout(fetchTimer.current)
@@ -218,6 +311,8 @@ function TileMap({ map }: { map: MapData }) {
       frame.current = 0
       window.removeEventListener('resize', scheduleDraw)
       window.removeEventListener('resize', scheduleFetch)
+      window.removeEventListener('pointermove', onPointerMove)
+      window.removeEventListener('pointerout', onPointerOut)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map])
@@ -244,6 +339,21 @@ function TileMap({ map }: { map: MapData }) {
         />
       </TransformComponent>
       <canvas ref={canvasRef} className="map-canvas" />
+      {hover && (
+        <div
+          className="map-tooltip"
+          style={{ left: hover.clientX + 14, top: hover.clientY + 14 }}
+        >
+          <div className="map-tooltip-cell">
+            {hover.x}, {hover.y}
+          </div>
+          {Object.entries(meta.current).map(([field, cells]) => (
+            <div key={field}>
+              {field}: {String(cells[hover.y * map.width + hover.x] ?? '…')}
+            </div>
+          ))}
+        </div>
+      )}
       <MapControls />
     </TransformWrapper>
   )
