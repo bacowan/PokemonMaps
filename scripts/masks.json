@@ -93,6 +93,10 @@
      ["*",     "SAND_OCEAN_SE", "OCEAN"],
      ["*",     "OCEAN",         "*"    ]],
 
+    [["*",     "*",             "*"    ],
+     ["*",     "SAND_OCEAN_SE_INNER", "SAND"],
+     ["*",     "SAND",         "OCEAN"    ]],
+
     [["*",     "OCEAN",         "*"    ],
      ["*",     "SAND_OCEAN_N",  "*"    ],
      ["*",     "*",             "*"    ]],

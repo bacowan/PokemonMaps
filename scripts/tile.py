@@ -37,6 +37,8 @@ class Tile(IntEnum):
     SAND_OCEAN_NE = 26
     SAND_OCEAN_SW = 27
     SAND_OCEAN_SE = 28
+    SAND_OCEAN_SW_INNER = 33
+    SAND_OCEAN_SE_INNER = 34
     # Combined from quarters of other tiles by save_quarter_tiles.py.
     OCEAN_CHANNEL_VERTICAL = 29
     OCEAN_CHANNEL_VERTICAL_NW_CORNER = 30
