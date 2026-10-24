@@ -1,8 +1,14 @@
 {
   "OCEAN_CHANNEL_VERTICAL": {
-    "top_left": "OCEAN_GRASS_NW_INNER",
-    "top_right": "OCEAN_GRASS_NE_INNER",
-    "bottom_left": "OCEAN_GRASS_NW_INNER",
-    "bottom_right": "OCEAN_GRASS_NE_INNER"
+    "top_left": "OCEAN_GRASS_W",
+    "top_right": "OCEAN_GRASS_E",
+    "bottom_left": "OCEAN_GRASS_W",
+    "bottom_right": "OCEAN_GRASS_E"
+  },
+  "OCEAN_CHANNEL_VERTICAL_NW_CORNER": {
+    "top_left": "OCEAN_GRASS_W",
+    "top_right": "OCEAN_GRASS_E_OUTER",
+    "bottom_left": "OCEAN_GRASS_W",
+    "bottom_right": "OCEAN_GRASS_E"
   }
 }

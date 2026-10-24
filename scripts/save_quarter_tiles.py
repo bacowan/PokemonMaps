@@ -9,7 +9,8 @@ to the tile each of its quarters comes from:
     }
   }
 
-Each combined tile is written as <out>/<name>.png.
+Each name must also be a Tile, with tiles.json pointing at its image, which is
+written as <out>/<name>.png.
 
 Usage:
   py scripts/save_quarter_tiles.py [--config quarter_tiles.json] [--out output/tilesets/combined]
@@ -35,8 +36,8 @@ def load_config(path: Path) -> dict[str, Combination]:
     config: dict[str, Combination] = {}
     problems: list[str] = []
     for name, quarters in data.items():
-        if name in Tile.__members__:
-            problems.append(f"{name}: already a tile name")
+        if name not in Tile.__members__:
+            problems.append(f"{name}: not a tile name; add it to Tile")
             continue
         if set(quarters) != set(QUARTERS):
             problems.append(f"{name}: needs exactly the quarters {', '.join(QUARTERS)}")

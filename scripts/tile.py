@@ -37,6 +37,9 @@ class Tile(IntEnum):
     SAND_OCEAN_NE = 26
     SAND_OCEAN_SW = 27
     SAND_OCEAN_SE = 28
+    # Combined from quarters of other tiles by save_quarter_tiles.py.
+    OCEAN_CHANNEL_VERTICAL = 29
+    OCEAN_CHANNEL_VERTICAL_NW_CORNER = 30
 
 
 def load_tile_images(path: Path = TILES_JSON) -> dict[Tile, Path]:
