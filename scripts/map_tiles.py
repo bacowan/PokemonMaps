@@ -13,7 +13,7 @@ from tilemap import Raster, Stage, Tilemap
 def initial_tilemap(raster: Raster) -> Tilemap:
     """An all-ocean tilemap the same size as the raster."""
     height, width = raster.shape
-    return [[Tile.OCEAN_CENTER] * width for _ in range(height)]
+    return [[Tile.OCEAN] * width for _ in range(height)]
 
 
 STAGES: Sequence[Stage] = [

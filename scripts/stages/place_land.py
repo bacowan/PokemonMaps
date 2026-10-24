@@ -31,21 +31,21 @@ def _land_tile(cell: Neighbours) -> Tile:
     above_right = cell.above_right == Terrain.LAND
 
     if here:
-        return Tile.GRASS_CENTER if above else Tile.GRASS_BELOW_OCEAN
+        return Tile.GRASS if above else Tile.GRASS_OCEAN_N
 
     if above and left:
-        return Tile.OCEAN_BELOW_RIGHT_OF_GRASS
+        return Tile.OCEAN_GRASS_NW_INNER
     if above and right:
-        return Tile.OCEAN_BELOW_LEFT_OF_GRASS
+        return Tile.OCEAN_GRASS_NE_INNER
     if above:
-        return Tile.OCEAN_BELOW_GRASS
+        return Tile.OCEAN_GRASS_N
     # Grass beside us with grass above it continues a cliff; without, it's the top corner.
     if left:
-        return Tile.OCEAN_RIGHT_OF_GRASS if above_left else Tile.OCEAN_RIGHT_OF_GRASS_CORNER
+        return Tile.OCEAN_GRASS_W if above_left else Tile.OCEAN_GRASS_W_OUTER
     if right:
-        return Tile.OCEAN_LEFT_OF_GRASS if above_right else Tile.OCEAN_LEFT_OF_GRASS_CORNER
+        return Tile.OCEAN_GRASS_E if above_right else Tile.OCEAN_GRASS_E_OUTER
     if above_left:
-        return Tile.OCEAN_BELOW_RIGHT_OF_GRASS_CORNER
+        return Tile.OCEAN_GRASS_NW_OUTER
     if above_right:
-        return Tile.OCEAN_BELOW_LEFT_OF_GRASS_CORNER
-    return Tile.OCEAN_CENTER
+        return Tile.OCEAN_GRASS_NE_OUTER
+    return Tile.OCEAN

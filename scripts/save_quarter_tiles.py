@@ -4,8 +4,8 @@ The config (quarter_tiles.json by default) maps a name for each combined tile
 to the tile each of its quarters comes from:
   {
     "OCEAN_CHANNEL_VERTICAL": {
-      "top_left": "OCEAN_BELOW_RIGHT_OF_GRASS", "top_right": "OCEAN_BELOW_LEFT_OF_GRASS",
-      "bottom_left": "OCEAN_BELOW_RIGHT_OF_GRASS", "bottom_right": "OCEAN_BELOW_LEFT_OF_GRASS"
+      "top_left": "OCEAN_GRASS_NW_INNER", "top_right": "OCEAN_GRASS_NE_INNER",
+      "bottom_left": "OCEAN_GRASS_NW_INNER", "bottom_right": "OCEAN_GRASS_NE_INNER"
     }
   }
 

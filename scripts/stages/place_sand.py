@@ -28,19 +28,19 @@ def _sand_tile(cell: Neighbours) -> Tile:
     of_ocean = Terrain.OCEAN in sides
 
     if above and left:
-        return Tile.SAND_BELOW_RIGHT_OF_OCEAN if of_ocean else Tile.SAND_BELOW_RIGHT_OF_GRASS
+        return Tile.SAND_OCEAN_NW if of_ocean else Tile.SAND_GRASS_NW
     if above and right:
-        return Tile.SAND_BELOW_LEFT_OF_OCEAN if of_ocean else Tile.SAND_BELOW_LEFT_OF_GRASS
+        return Tile.SAND_OCEAN_NE if of_ocean else Tile.SAND_GRASS_NE
     if below and left:
-        return Tile.SAND_ABOVE_RIGHT_OF_OCEAN if of_ocean else Tile.SAND_ABOVE_RIGHT_OF_GRASS
+        return Tile.SAND_OCEAN_SW if of_ocean else Tile.SAND_GRASS_SW
     if below and right:
-        return Tile.SAND_ABOVE_LEFT_OF_OCEAN if of_ocean else Tile.SAND_ABOVE_LEFT_OF_GRASS
+        return Tile.SAND_OCEAN_SE if of_ocean else Tile.SAND_GRASS_SE
     if above:
-        return Tile.SAND_BELOW_OCEAN if of_ocean else Tile.SAND_BELOW_GRASS
+        return Tile.SAND_OCEAN_N if of_ocean else Tile.SAND_GRASS_N
     if below:
-        return Tile.SAND_ABOVE_OCEAN if of_ocean else Tile.SAND_ABOVE_GRASS
+        return Tile.SAND_OCEAN_S if of_ocean else Tile.SAND_GRASS_S
     if left:
-        return Tile.SAND_RIGHT_OF_OCEAN if of_ocean else Tile.SAND_RIGHT_OF_GRASS
+        return Tile.SAND_OCEAN_W if of_ocean else Tile.SAND_GRASS_W
     if right:
-        return Tile.SAND_LEFT_OF_OCEAN if of_ocean else Tile.SAND_LEFT_OF_GRASS
-    return Tile.SAND_CENTER
+        return Tile.SAND_OCEAN_E if of_ocean else Tile.SAND_GRASS_E
+    return Tile.SAND
