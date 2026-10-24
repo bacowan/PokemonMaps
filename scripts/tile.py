@@ -1,50 +1,51 @@
 """The set of tiles a Pokemon tile map is made of."""
 
 import json
-from enum import IntEnum
+from enum import IntEnum, auto, unique
 from pathlib import Path
 
 TILES_JSON = Path(__file__).with_name("tiles.json")
 
 
+@unique
 class Tile(IntEnum):
-    OCEAN = 0
-    GRASS = 1
-    GRASS_OCEAN_N = 2
-    OCEAN_GRASS_N = 3
-    OCEAN_GRASS_E = 4
-    OCEAN_GRASS_E_OUTER = 5
-    OCEAN_GRASS_W = 6
-    OCEAN_GRASS_W_OUTER = 7
-    OCEAN_GRASS_NW_INNER = 8
-    OCEAN_GRASS_NE_INNER = 9
-    OCEAN_GRASS_NW_OUTER = 10
-    OCEAN_GRASS_NE_OUTER = 11
-    SAND = 12
-    SAND_GRASS_N = 13
-    SAND_GRASS_S = 14
-    SAND_GRASS_W = 15
-    SAND_GRASS_E = 16
-    SAND_GRASS_NW = 17
-    SAND_GRASS_NE = 18
-    SAND_GRASS_SW = 19
-    SAND_GRASS_SE = 20
-    SAND_OCEAN_N = 21
-    SAND_OCEAN_S = 22
-    SAND_OCEAN_W = 23
-    SAND_OCEAN_E = 24
-    SAND_OCEAN_NW = 25
-    SAND_OCEAN_NE = 26
-    SAND_OCEAN_SW = 27
-    SAND_OCEAN_SE = 28
-    SAND_OCEAN_SW_INNER = 33
-    SAND_OCEAN_SE_INNER = 34
+    OCEAN = auto()
+    GRASS = auto()
+    GRASS_OCEAN_N = auto()
+    OCEAN_GRASS_N = auto()
+    OCEAN_GRASS_E = auto()
+    OCEAN_GRASS_E_OUTER = auto()
+    OCEAN_GRASS_W = auto()
+    OCEAN_GRASS_W_OUTER = auto()
+    OCEAN_GRASS_NW_INNER = auto()
+    OCEAN_GRASS_NE_INNER = auto()
+    OCEAN_GRASS_NW_OUTER = auto()
+    OCEAN_GRASS_NE_OUTER = auto()
+    SAND = auto()
+    SAND_GRASS_N = auto()
+    SAND_GRASS_S = auto()
+    SAND_GRASS_W = auto()
+    SAND_GRASS_E = auto()
+    SAND_GRASS_NW = auto()
+    SAND_GRASS_NE = auto()
+    SAND_GRASS_SW = auto()
+    SAND_GRASS_SE = auto()
+    SAND_OCEAN_N = auto()
+    SAND_OCEAN_S = auto()
+    SAND_OCEAN_W = auto()
+    SAND_OCEAN_E = auto()
+    SAND_OCEAN_NW = auto()
+    SAND_OCEAN_NE = auto()
+    SAND_OCEAN_SW = auto()
+    SAND_OCEAN_SE = auto()
+    SAND_OCEAN_SW_INNER = auto()
+    SAND_OCEAN_SE_INNER = auto()
     # Combined from quarters of other tiles by save_quarter_tiles.py.
-    OCEAN_CHANNEL_VERTICAL = 29
-    OCEAN_CHANNEL_VERTICAL_NW_CORNER = 30
-    SAND_OCEAN_W_GRASS_NW = 31
-    OCEAN_CHANNEL_VERTICAL_NW_OUTER_CORNER = 32
-    OCEAN_SAND_NW_GRASS_E = 33
+    OCEAN_CHANNEL_VERTICAL = auto()
+    OCEAN_CHANNEL_VERTICAL_NW_CORNER = auto()
+    SAND_OCEAN_W_GRASS_NW = auto()
+    OCEAN_CHANNEL_VERTICAL_NW_OUTER_CORNER = auto()
+    OCEAN_SAND_NW_GRASS_E = auto()
 
 
 def load_tile_images(path: Path = TILES_JSON) -> dict[Tile, Path]:
