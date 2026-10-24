@@ -10,5 +10,11 @@
     "top_right": "OCEAN_GRASS_E_OUTER",
     "bottom_left": "OCEAN_GRASS_W",
     "bottom_right": "OCEAN_GRASS_E"
+  },
+  "SAND_OCEAN_W_GRASS_NW": {
+    "top_left": "OCEAN_GRASS_N",
+    "top_right": "SAND_GRASS_N",
+    "bottom_left": "OCEAN",
+    "bottom_right": "SAND_OCEAN_W"
   }
 }
