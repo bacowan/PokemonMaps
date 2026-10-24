@@ -5,6 +5,8 @@ which is then written next to each other as:
   <out>.json  - grid size, tile legend and source georeferencing
   <out>.bin   - the tile grid, one uint8 per tile, row-major
   <out>.tif   - the tile grid as a single-band GeoTIFF on the source's grid
+  <out>.cells.json - per-cell metadata, one [row][col] grid per field:
+                     source - the input raster value the tile was made from
 
 Usage:
   py -m pip install -r requirements.txt
@@ -21,9 +23,10 @@ from rasterio.profiles import Profile
 
 from map_tiles import generate_tilemap
 from tile import Tile
+from tilemap import Raster
 
 
-def save(tiles: list[list[Tile]], profile: Profile, out: Path) -> None:
+def save(tiles: list[list[Tile]], source: Raster, profile: Profile, out: Path) -> None:
     grid = np.array(tiles, dtype=np.uint8)
     height, width = grid.shape
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -38,6 +41,9 @@ def save(tiles: list[list[Tile]], profile: Profile, out: Path) -> None:
     out.with_suffix(".json").write_text(json.dumps(meta, indent=2))
 
     out.with_suffix(".bin").write_bytes(grid.tobytes())
+
+    cells = {"source": source.tolist()}
+    out.with_suffix(".cells.json").write_text(json.dumps(cells, separators=(",", ":")))
 
     # Only crs and transform come from the source, so each tile sits on the
     # pixel it came from; the rest describes our single band of tile values.
@@ -65,9 +71,10 @@ def main() -> None:
 
     with rasterio.open(args.tif) as dataset:
         tiles = generate_tilemap(dataset)
+        source = dataset.read(1)
         profile = dataset.profile
 
-    save(tiles, profile, args.out)
+    save(tiles, source, profile, args.out)
 
 
 if __name__ == "__main__":
