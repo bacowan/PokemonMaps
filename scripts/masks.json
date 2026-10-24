@@ -73,6 +73,10 @@
   ],
 
   "SAND": [
+    [["SAND",     "SAND",             "OCEAN"    ],
+     ["SAND",     "OCEAN_SAND_NW_GRASS_E",          "LAND"    ],
+     ["OCEAN",     "OCEAN",             "OCEAN"    ]],
+
     [["OCEAN",     "LAND",         "*"    ],
      ["OCEAN", "SAND_OCEAN_W_GRASS_NW", "*"    ],
      ["OCEAN",     "SAND",             "*"    ]],
