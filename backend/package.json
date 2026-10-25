@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch --include ../scripts/output/render/render.json --include ../scripts/output/render/render.bin --include ../scripts/output/render/render.cells.json src/index.ts",
     "build": "tsc",
     "start": "cross-env NODE_ENV=production node dist/index.js"
   },

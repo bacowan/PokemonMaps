@@ -17,6 +17,12 @@
     "bottom_left": "OCEAN_GRASS_W",
     "bottom_right": "SAND_OCEAN_W"
   },
+  "OCEAN_CHANNEL_VERTICAL_SAND_RIGHT_CORNER_SE": {
+    "top_left": "OCEAN_GRASS_W",
+    "top_right": "SAND_OCEAN_SW",
+    "bottom_left": "OCEAN_GRASS_W",
+    "bottom_right": "SAND_OCEAN_SW"
+  },
   "OCEAN_CHANNEL_VERTICAL_NW_CORNER": {
     "top_left": "OCEAN_GRASS_W",
     "top_right": "OCEAN_GRASS_E_OUTER",
