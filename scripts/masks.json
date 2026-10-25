@@ -149,6 +149,12 @@
             "*  OCEAN   OCEAN",
             "*  OCEAN  *"]},
 
+  {"name": "sand-ocean-sw",
+   "tile": "SAND_OCEAN_SW",
+   "mask": ["OCEAN  OCEAN      SAND",
+            "OCEAN  OCEAN   *",
+            "*  OCEAN  *"]},
+
 
   {"name": "sand-ocean-n",
    "tile": "SAND_OCEAN_N",
@@ -160,6 +166,12 @@
    "tile": "SAND_OCEAN_SE_INNER",
    "mask": ["SAND  SAND     *",
             "SAND  OCEAN  OCEAN",
+            "*  OCEAN     *"]},
+
+  {"name": "sand-ocean-sw-inner",
+   "tile": "SAND_OCEAN_SW_INNER",
+   "mask": ["*  SAND     SAND",
+            "OCEAN  OCEAN  SAND",
             "*  OCEAN     *"]},
 
   {"name": "ocean-sand-n",
