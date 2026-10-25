@@ -4,7 +4,8 @@ The config (masks.json by default) maps each Terrain to the masks for cells of
 that terrain. A mask is a 3x3 grid laid out as on the map (first row above the
 cell); a cell's masks are tried in order and the first match wins. The centre
 of each grid names the Tile to use; every other entry is the Terrain that
-neighbour must be, or "*" for anything:
+neighbour must be, "!" and a Terrain for anything but that one, or "*" for
+anything:
   {
     "SAND": [
       [["*", "OCEAN",        "*"],
@@ -32,17 +33,18 @@ from tilemap import Raster, Tilemap
 
 MASKS_JSON = Path(__file__).with_name("masks.json")
 ANY = "*"
+NOT = "!"
 CENTRE = (1, 1)
 
 
 @dataclass(frozen=True)
 class Mask:
     tile: Tile
-    neighbours: dict[tuple[int, int], Terrain]
-    """The terrain required at each (row, col) of the 3x3 window; "*" entries are left out."""
+    neighbours: dict[tuple[int, int], frozenset[Terrain]]
+    """The terrains allowed at each (row, col) of the 3x3 window; "*" entries are left out."""
 
     def matches(self, window: Raster) -> bool:
-        return all(window[pos] == terrain for pos, terrain in self.neighbours.items())
+        return all(window[pos] in allowed for pos, allowed in self.neighbours.items())
 
 
 type Masks = dict[Terrain, list[Mask]]
@@ -80,15 +82,18 @@ def _parse_masks(label: str, grids: list[list[list[str]]], problems: list[str]) 
         if centre not in Tile.__members__:
             problems.append(f"{where}: unknown tile {centre}")
             continue
-        neighbours: dict[tuple[int, int], Terrain] = {}
+        neighbours: dict[tuple[int, int], frozenset[Terrain]] = {}
         for pos in np.ndindex(3, 3):
             entry = grid[pos[0]][pos[1]]
             if pos == CENTRE or entry == ANY:
                 continue
-            if entry not in Terrain.__members__:
+            name = entry.removeprefix(NOT)
+            if name not in Terrain.__members__:
                 problems.append(f"{where} ({centre}): unknown terrain {entry}")
                 continue
-            neighbours[pos] = Terrain[entry]
+            terrain = Terrain[name]
+            negated = entry.startswith(NOT)
+            neighbours[pos] = frozenset(Terrain) - {terrain} if negated else frozenset({terrain})
         masks.append(Mask(Tile[centre], neighbours))
     return masks
 
