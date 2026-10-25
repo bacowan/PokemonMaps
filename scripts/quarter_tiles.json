@@ -46,5 +46,11 @@
     "top_right": "OCEAN_GRASS_E_OUTER",
     "bottom_left": "OCEAN_GRASS_E_OUTER",
     "bottom_right": "OCEAN_GRASS_E_OUTER"
+  },
+  "OCEAN_GRASS_NE_OUTER_SAND_NW_OUTER": {
+    "top_left": "SAND_OCEAN_SE",
+    "top_right": "OCEAN_GRASS_NE_OUTER",
+    "bottom_left": "OCEAN",
+    "bottom_right": "OCEAN"
   }
 }

@@ -49,6 +49,8 @@ class Tile(IntEnum):
     OCEAN_CHANNEL_VERTICAL_SAND_RIGHT = auto()
     OCEAN_CHANNEL_VERTICAL_SAND_RIGHT_CORNER_NE = auto()
     OCEAN_CHANNEL_VERTICAL_SAND_RIGHT_CORNER_SE = auto()
+    OCEAN_GRASS_NE_OUTER_SAND_NW_OUTER = auto()
+    SAND_OCEAN_NE_GRASS_W = auto()
 
 
 def load_tile_images(path: Path = TILES_JSON) -> dict[Tile, Path]:
