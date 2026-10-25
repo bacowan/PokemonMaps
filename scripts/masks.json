@@ -93,13 +93,6 @@
             "*  *      *"]},
 
 
-  {"name": "ocean",
-   "tile": "OCEAN",
-   "mask": ["*  *      *",
-            "*  OCEAN  *",
-            "*  *      *"]},
-
-
   {"name": "grass",
    "tile": "GRASS",
    "mask": ["*  !OCEAN  *",
@@ -144,12 +137,6 @@
             "*  SAND   OCEAN",
             "*  *      *"]},
 
-  {"name": "sand-ocean-sw",
-   "tile": "SAND_OCEAN_SW",
-   "mask": ["*      *      *",
-            "OCEAN  SAND   *",
-            "*      OCEAN  *"]},
-
   {"name": "sand-ocean-se",
    "tile": "SAND_OCEAN_SE",
    "mask": ["*  *      *",
@@ -176,11 +163,11 @@
             "*  SAND   *",
             "*  *      *"]},
 
-  {"name": "sand-ocean-s",
+  {"name": "ocean-sand-n",
    "tile": "SAND_OCEAN_S",
-   "mask": ["*  *      *",
-            "*  SAND   *",
-            "*  OCEAN  *"]},
+   "mask": ["*  SAND      *",
+            "*  OCEAN   *",
+            "*  *  *"]},
 
   {"name": "sand-ocean-e",
    "tile": "SAND_OCEAN_E",
@@ -243,5 +230,12 @@
    "tile": "SAND",
    "mask": ["*  *     *",
             "*  SAND  *",
-            "*  *     *"]}
+            "*  *     *"]},
+
+
+  {"name": "ocean",
+   "tile": "OCEAN",
+   "mask": ["*  *      *",
+            "*  OCEAN  *",
+            "*  *      *"]}
 ]
