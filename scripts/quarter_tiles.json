@@ -5,6 +5,12 @@
     "bottom_left": "OCEAN_GRASS_W",
     "bottom_right": "OCEAN_GRASS_E"
   },
+  "OCEAN_CHANNEL_VERTICAL_TOP": {
+    "top_left": "OCEAN_GRASS_NW_INNER",
+    "top_right": "OCEAN_GRASS_NE_INNER",
+    "bottom_left": "OCEAN_GRASS_W",
+    "bottom_right": "OCEAN_GRASS_E"
+  },
   "OCEAN_CHANNEL_VERTICAL_SAND_RIGHT": {
     "top_left": "OCEAN_GRASS_W",
     "top_right": "SAND_OCEAN_W",
@@ -35,6 +41,12 @@
     "bottom_left": "OCEAN_GRASS_W",
     "bottom_right": "OCEAN"
   },
+  "OCEAN_CHANNEL_VERTICAL_NE_OUTER_CORNER": {
+    "top_left": "OCEAN_GRASS_NW_OUTER",
+    "top_right": "OCEAN_GRASS_E",
+    "bottom_left": "OCEAN",
+    "bottom_right": "OCEAN_GRASS_E"
+  },
   "SAND_OCEAN_W_GRASS_NW": {
     "top_left": "OCEAN_GRASS_N",
     "top_right": "SAND_GRASS_N",
@@ -52,5 +64,11 @@
     "top_right": "OCEAN_GRASS_NE_OUTER",
     "bottom_left": "OCEAN",
     "bottom_right": "OCEAN"
+  },
+  "OCEAN_GRASS_NW_NE_OUTER": {
+    "top_left": "OCEAN_GRASS_NW_OUTER",
+    "top_right": "OCEAN_GRASS_NE_OUTER",
+    "bottom_left": "OCEAN_GRASS_NW_OUTER",
+    "bottom_right": "OCEAN_GRASS_NW_OUTER"
   }
 }
