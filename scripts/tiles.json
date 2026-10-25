@@ -34,5 +34,6 @@
   "OCEAN_CHANNEL_VERTICAL_NW_CORNER": "output/tilesets/combined/OCEAN_CHANNEL_VERTICAL_NW_CORNER.png",
   "OCEAN_CHANNEL_VERTICAL_NW_OUTER_CORNER": "output/tilesets/combined/OCEAN_CHANNEL_VERTICAL_NW_OUTER_CORNER.png",
   "SAND_OCEAN_W_GRASS_NW": "output/tilesets/combined/SAND_OCEAN_W_GRASS_NW.png",
-  "OCEAN_SAND_NW_GRASS_E": "output/tilesets/combined/OCEAN_SAND_NW_GRASS_E.png"
+  "OCEAN_SAND_NW_GRASS_E": "output/tilesets/combined/OCEAN_SAND_NW_GRASS_E.png",
+  "OCEAN_CHANNEL_VERTICAL_SAND_RIGHT": "output/tilesets/combined/OCEAN_CHANNEL_VERTICAL_SAND_RIGHT.png"
 }
