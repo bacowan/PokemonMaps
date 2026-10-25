@@ -1,20 +1,17 @@
 """Picking each tile by matching its cell's 3x3 neighbourhood against masks.
 
-The config (masks.json by default) maps each Terrain to the masks for cells of
-that terrain. A mask is a 3x3 grid laid out as on the map (first row above the
-cell); a cell's masks are tried in order and the first match wins. The centre
-of each grid names the Tile to use; every other entry is the Terrain that
-neighbour must be, "!" and a Terrain for anything but that one, or "*" for
-anything:
-  {
-    "SAND": [
-      [["*", "OCEAN",        "*"],
-       ["*", "SAND_OCEAN_N", "*"],
-       ["*", "*",            "*"]],
-      ...
-    ],
+The config (masks.json by default) is a list of masks, tried in order for every
+cell; the first match wins. Each mask pairs the Tile to use with a 3x3 grid laid
+out as on the map (first row above the cell, centre the cell itself). Every
+entry, centre included, is the Terrain that cell must be, "!" and a Terrain for
+anything but that one, or "*" for anything:
+  [
+    {"tile": "SAND_OCEAN_N",
+     "mask": [["*", "OCEAN", "*"],
+              ["*", "SAND",  "*"],
+              ["*", "*",     "*"]]},
     ...
-  }
+  ]
 
 Cells past the edge of the map copy the nearest in-bounds cell, so the map
 border never draws an edge on its own.
@@ -24,6 +21,7 @@ import json
 from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TypedDict
 
 import numpy as np
 
@@ -34,68 +32,60 @@ from tilemap import Raster, Tilemap
 MASKS_JSON = Path(__file__).with_name("masks.json")
 ANY = "*"
 NOT = "!"
-CENTRE = (1, 1)
+
+
+class MaskConfig(TypedDict):
+    tile: str
+    mask: list[list[str]]
 
 
 @dataclass(frozen=True)
 class Mask:
     tile: Tile
-    neighbours: dict[tuple[int, int], frozenset[Terrain]]
+    cells: dict[tuple[int, int], frozenset[Terrain]]
     """The terrains allowed at each (row, col) of the 3x3 window; "*" entries are left out."""
 
     def matches(self, window: Raster) -> bool:
-        return all(window[pos] in allowed for pos, allowed in self.neighbours.items())
+        return all(window[pos] in allowed for pos, allowed in self.cells.items())
 
 
-type Masks = dict[Terrain, list[Mask]]
-"""The masks to try, in order, for cells of each terrain."""
-
-
-def load_masks(path: Path = MASKS_JSON) -> Masks:
-    """Read the mask config, failing on missing terrain, bad shapes or unknown names."""
-    data: dict[str, list[list[list[str]]]] = json.loads(path.read_text())
+def load_masks(path: Path = MASKS_JSON) -> list[Mask]:
+    """Read the mask config, failing on bad shapes or unknown names."""
+    configs: list[MaskConfig] = json.loads(path.read_text())
     problems: list[str] = []
-    missing = [terrain.name for terrain in Terrain if terrain.name not in data]
-    extra = [name for name in data if name not in Terrain.__members__]
-    if missing:
-        problems.append(f"missing terrain: {', '.join(missing)}")
-    if extra:
-        problems.append(f"unknown terrain: {', '.join(extra)}")
-    masks: Masks = {}
-    for name, grids in data.items():
-        if name in Terrain.__members__:
-            masks[Terrain[name]] = _parse_masks(f"{name} mask", grids, problems)
+    masks = [
+        mask
+        for index, config in enumerate(configs)
+        if (mask := _parse_mask(f"mask {index}", config, problems)) is not None
+    ]
     if problems:
         raise ValueError(f"{path}:\n  " + "\n  ".join(problems))
     return masks
 
 
-def _parse_masks(label: str, grids: list[list[list[str]]], problems: list[str]) -> list[Mask]:
-    """Parse one terrain's grids, appending anything wrong with them to problems."""
-    masks: list[Mask] = []
-    for index, grid in enumerate(grids):
-        where = f"{label} {index}"
-        if len(grid) != 3 or any(len(row) != 3 for row in grid):
-            problems.append(f"{where}: must be 3x3")
+def _parse_mask(where: str, config: MaskConfig, problems: list[str]) -> Mask | None:
+    """Parse one mask, appending anything wrong with it to problems."""
+    tile, grid = config.get("tile"), config.get("mask")
+    if tile not in Tile.__members__:
+        problems.append(f"{where}: unknown tile {tile}")
+        return None
+    where = f"{where} ({tile})"
+    if not isinstance(grid, list) or len(grid) != 3 or any(len(row) != 3 for row in grid):
+        problems.append(f"{where}: mask must be 3x3")
+        return None
+    cells: dict[tuple[int, int], frozenset[Terrain]] = {}
+    for pos in np.ndindex(3, 3):
+        entry = grid[pos[0]][pos[1]]
+        if entry == ANY:
             continue
-        centre = grid[1][1]
-        if centre not in Tile.__members__:
-            problems.append(f"{where}: unknown tile {centre}")
+        name = entry.removeprefix(NOT)
+        if name not in Terrain.__members__:
+            problems.append(f"{where}: unknown terrain {entry}")
             continue
-        neighbours: dict[tuple[int, int], frozenset[Terrain]] = {}
-        for pos in np.ndindex(3, 3):
-            entry = grid[pos[0]][pos[1]]
-            if pos == CENTRE or entry == ANY:
-                continue
-            name = entry.removeprefix(NOT)
-            if name not in Terrain.__members__:
-                problems.append(f"{where} ({centre}): unknown terrain {entry}")
-                continue
-            terrain = Terrain[name]
-            negated = entry.startswith(NOT)
-            neighbours[pos] = frozenset(Terrain) - {terrain} if negated else frozenset({terrain})
-        masks.append(Mask(Tile[centre], neighbours))
-    return masks
+        terrain = Terrain[name]
+        negated = entry.startswith(NOT)
+        cells[pos] = frozenset(Terrain) - {terrain} if negated else frozenset({terrain})
+    return Mask(Tile[tile], cells)
 
 
 def windows(raster: Raster) -> Iterator[tuple[int, int, Raster]]:
@@ -113,10 +103,10 @@ def pick_tile(masks: Sequence[Mask], window: Raster) -> Tile:
     raise ValueError(f"no mask matches window:\n{window}")
 
 
-def place_tiles(raster: Raster, masks: Masks) -> Tilemap:
-    """Pick every cell's tile from the masks for its terrain."""
+def place_tiles(raster: Raster, masks: Sequence[Mask]) -> Tilemap:
+    """Pick every cell's tile from the first mask that matches it."""
     height, width = raster.shape
     tiles: Tilemap = [[Tile.OCEAN] * width for _ in range(height)]
     for row, col, window in windows(raster):
-        tiles[row][col] = pick_tile(masks[Terrain(raster[row, col])], window)
+        tiles[row][col] = pick_tile(masks, window)
     return tiles
