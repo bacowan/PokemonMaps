@@ -3,15 +3,16 @@
 The config (masks.json by default) is a list of masks, tried in order for every
 cell; the first match wins. Each mask has a unique name (shown as "rule" in the
 frontend's debug tooltip), the Tile to use and a 3x3 grid laid out as on the map
-(first row above the cell, centre the cell itself). Every entry, centre included,
-is the Terrain that cell must be, "!" and a Terrain for anything but that one, or
-"*" for anything:
+(first row above the cell, centre the cell itself), one space-separated string
+per row. Every entry, centre included, is the code of the Terrain that cell must
+be (O ocean, L land, S sand), "!" and a code for anything but that one, or "*"
+for anything:
   [
     {"name": "sand-ocean-n",
      "tile": "SAND_OCEAN_N",
-     "mask": [["*", "OCEAN", "*"],
-              ["*", "SAND",  "*"],
-              ["*", "*",     "*"]]},
+     "mask": ["*  O  *",
+              "*  S  *",
+              "*  *  *"]},
     ...
   ]
 
@@ -34,12 +35,13 @@ from tilemap import Raster, Tilemap
 MASKS_JSON = Path(__file__).with_name("masks.json")
 ANY = "*"
 NOT = "!"
+TERRAIN_CODES = {"O": Terrain.OCEAN, "L": Terrain.LAND, "S": Terrain.SAND}
 
 
 class MaskConfig(TypedDict):
     name: str
     tile: str
-    mask: list[list[str]]
+    mask: list[str]
 
 
 @dataclass(frozen=True)
@@ -82,19 +84,20 @@ def _parse_mask(where: str, config: MaskConfig, problems: list[str]) -> Mask | N
     if tile not in Tile.__members__:
         problems.append(f"{where}: unknown tile {tile}")
         return None
-    if not isinstance(grid, list) or len(grid) != 3 or any(len(row) != 3 for row in grid):
+    rows = [row.split() if isinstance(row, str) else [] for row in grid] if isinstance(grid, list) else []
+    if len(rows) != 3 or any(len(row) != 3 for row in rows):
         problems.append(f"{where}: mask must be 3x3")
         return None
     cells: dict[tuple[int, int], frozenset[Terrain]] = {}
     for pos in np.ndindex(3, 3):
-        entry = grid[pos[0]][pos[1]]
+        entry = rows[pos[0]][pos[1]]
         if entry == ANY:
             continue
-        terrain_name = entry.removeprefix(NOT)
-        if terrain_name not in Terrain.__members__:
+        code = entry.removeprefix(NOT)
+        if code not in TERRAIN_CODES:
             problems.append(f"{where}: unknown terrain {entry}")
             continue
-        terrain = Terrain[terrain_name]
+        terrain = TERRAIN_CODES[code]
         negated = entry.startswith(NOT)
         cells[pos] = frozenset(Terrain) - {terrain} if negated else frozenset({terrain})
     return Mask(name, Tile[tile], cells)
