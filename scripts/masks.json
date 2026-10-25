@@ -94,14 +94,14 @@
 
   {"name": "ocean-grass-ne-outer-sand-nw-outer",
    "tile": "OCEAN_GRASS_NE_OUTER_SAND_NW_OUTER",
-   "mask": ["SAND  OCEAN      LAND",
+   "mask": ["SAND  SAND      LAND",
             "OCEAN  OCEAN  OCEAN",
             "OCEAN  OCEAN      OCEAN"]},
 
   {"name": "ocean-grass-ne-outer",
    "tile": "OCEAN_GRASS_NE_OUTER",
-   "mask": ["*  *      LAND",
-            "*  OCEAN  *",
+   "mask": ["*  OCEAN      LAND",
+            "*  OCEAN  OCEAN",
             "*  *      *"]},
 
 
@@ -123,18 +123,6 @@
    "mask": ["SAND   SAND   OCEAN",
             "SAND   SAND   LAND",
             "OCEAN  OCEAN  OCEAN"]},
-
-  {"name": "sand-ocean-s-sand-e",
-   "tile": "SAND_OCEAN_S",
-   "mask": ["!OCEAN  !OCEAN  !OCEAN",
-            "OCEAN   SAND    SAND",
-            "*       OCEAN   !OCEAN"]},
-
-  {"name": "sand-ocean-sw-inner-grass-e",
-   "tile": "SAND_OCEAN_SW_INNER",
-   "mask": ["!OCEAN  !OCEAN  !OCEAN",
-            "OCEAN   SAND    LAND",
-            "*       OCEAN   !OCEAN"]},
 
 
   {"name": "sand-ocean-n-sand-w",
@@ -182,9 +170,15 @@
 
   {"name": "sand-ocean-sw-inner",
    "tile": "SAND_OCEAN_SW_INNER",
-   "mask": ["*  SAND     SAND",
+   "mask": ["*  SAND     *",
             "OCEAN  OCEAN  SAND",
             "*  OCEAN     *"]},
+
+  {"name": "sand-ocean-e-ne",
+   "tile": "SAND_OCEAN_NE",
+   "mask": ["OCEAN  *     *",
+            "SAND  OCEAN  OCEAN",
+            "*  *     *"]},
 
   {"name": "ocean-sand-n",
    "tile": "SAND_OCEAN_S",
