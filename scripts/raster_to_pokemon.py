@@ -7,6 +7,7 @@ which is then written next to each other as:
   <out>.tif   - the tile grid as a single-band GeoTIFF on the source's grid
   <out>.cells.json - per-cell metadata, one [row][col] grid per field:
                      source - the input raster value the tile was made from
+                     rule   - the name of the masks.json rule that picked the tile
 
 Usage:
   py -m pip install -r requirements.txt
@@ -26,7 +27,9 @@ from tile import Tile
 from tilemap import Raster
 
 
-def save(tiles: list[list[Tile]], source: Raster, profile: Profile, out: Path) -> None:
+def save(
+    tiles: list[list[Tile]], rules: list[list[str]], source: Raster, profile: Profile, out: Path
+) -> None:
     grid = np.array(tiles, dtype=np.uint8)
     height, width = grid.shape
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -42,7 +45,7 @@ def save(tiles: list[list[Tile]], source: Raster, profile: Profile, out: Path) -
 
     out.with_suffix(".bin").write_bytes(grid.tobytes())
 
-    cells = {"source": source.tolist()}
+    cells = {"source": source.tolist(), "rule": rules}
     out.with_suffix(".cells.json").write_text(json.dumps(cells, separators=(",", ":")))
 
     # Only crs and transform come from the source, so each tile sits on the
@@ -70,11 +73,11 @@ def main() -> None:
         parser.error(f"input file not found: {args.tif}")
 
     with rasterio.open(args.tif) as dataset:
-        tiles = generate_tilemap(dataset)
+        tiles, rules = generate_tilemap(dataset)
         source = dataset.read(1)
         profile = dataset.profile
 
-    save(tiles, source, profile, args.out)
+    save(tiles, rules, source, profile, args.out)
 
 
 if __name__ == "__main__":
