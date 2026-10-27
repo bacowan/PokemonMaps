@@ -31,7 +31,7 @@ from terrain import Terrain
 from tile import Tile
 from tilemap import Raster, Tilemap
 
-MASKS_JSON = Path(__file__).with_name("masks.json")
+MASKS_JSON = Path(__file__).parent.parent / "config" / "masks.json"
 ANY = "*"
 NOT = "!"
 

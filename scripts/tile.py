@@ -4,7 +4,7 @@ import json
 from enum import IntEnum, auto, unique
 from pathlib import Path
 
-TILES_JSON = Path(__file__).with_name("tiles.json")
+TILES_JSON = Path(__file__).parent / "config" / "tiles.json"
 
 
 @unique

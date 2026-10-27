@@ -61,7 +61,7 @@ app.use(
 );
 
 app.get("/api/tiles.json", (_req, res) => {
-  res.sendFile(path.join(scriptsDir, "tiles.json"));
+  res.sendFile(path.join(scriptsDir, "config", "tiles.json"));
 });
 
 app.get("/api/hello", (_req, res) => {

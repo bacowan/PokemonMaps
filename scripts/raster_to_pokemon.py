@@ -6,12 +6,13 @@ which is then written next to each other as:
   <out>.bin   - the tile grid, one uint8 per tile, row-major
   <out>.tif   - the tile grid as a single-band GeoTIFF on the source's grid
   <out>.cells.json - per-cell metadata, one [row][col] grid per field:
-                     source - the input raster value the tile was made from
+                     source - the raster value the tile was made from, after
+                              the stages before autotile (e.g. roads)
                      rule   - the name of the masks.json rule that picked the tile
 
 Usage:
   py -m pip install -r requirements.txt
-  py scripts/raster_to_pokemon.py <input.tif> <output path>
+  py scripts/raster_to_pokemon.py <input.tif> <roads.gpkg> <output path>
 """
 
 import argparse
@@ -66,15 +67,17 @@ def save(
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("tif", type=Path, help="input .tif raster")
+    parser.add_argument("roads", type=Path, help="road lines (e.g. .gpkg), in the same CRS as the raster")
     parser.add_argument("out", type=Path, help="output path, without extension (e.g. output/map)")
     args = parser.parse_args()
 
     if not args.tif.is_file():
         parser.error(f"input file not found: {args.tif}")
+    if not args.roads.is_file():
+        parser.error(f"roads file not found: {args.roads}")
 
     with rasterio.open(args.tif) as dataset:
-        tiles, rules = build_map(dataset)
-        source = dataset.read(1)
+        tiles, rules, source = build_map(dataset, args.roads)
         profile = dataset.profile
 
     save(tiles, rules, source, profile, args.out)

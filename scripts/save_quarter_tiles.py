@@ -13,7 +13,7 @@ Each name must also be a Tile, with tiles.json pointing at its image, which is
 written as <out>/<name>.png.
 
 Usage:
-  py scripts/save_quarter_tiles.py [--config quarter_tiles.json] [--out output/tilesets/combined]
+  py scripts/save_quarter_tiles.py [--config config/quarter_tiles.json] [--out output/tilesets/combined]
 """
 
 import argparse
@@ -26,7 +26,7 @@ from tile import Tile
 type Combination = tuple[int, int, int, int]
 """The Tile value each quarter comes from, in QUARTERS order."""
 
-QUARTER_TILES_JSON = Path(__file__).with_name("quarter_tiles.json")
+QUARTER_TILES_JSON = Path(__file__).parent / "config" / "quarter_tiles.json"
 DEFAULT_OUT = Path(__file__).parent / "output" / "tilesets" / "combined"
 
 
