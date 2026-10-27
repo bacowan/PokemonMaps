@@ -116,7 +116,7 @@ def pick_mask(masks: Sequence[Mask], window: Raster) -> Mask:
     raise ValueError(f"no mask matches window:\n{window}")
 
 
-def place_tiles(raster: Raster, masks: Sequence[Mask]) -> tuple[Tilemap, list[list[str]]]:
+def autotile(raster: Raster, masks: Sequence[Mask]) -> tuple[Tilemap, list[list[str]]]:
     """Pick every cell's tile from the first mask that matches it.
 
     Returns the tiles and, on the same grid, the name of the mask that picked each.

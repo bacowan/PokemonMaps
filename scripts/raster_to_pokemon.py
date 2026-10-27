@@ -22,7 +22,7 @@ import numpy as np
 import rasterio
 from rasterio.profiles import Profile
 
-from map_tiles import generate_tilemap
+from pipeline import build_map
 from tile import Tile
 from tilemap import Raster
 
@@ -73,7 +73,7 @@ def main() -> None:
         parser.error(f"input file not found: {args.tif}")
 
     with rasterio.open(args.tif) as dataset:
-        tiles, rules = generate_tilemap(dataset)
+        tiles, rules = build_map(dataset)
         source = dataset.read(1)
         profile = dataset.profile
 
