@@ -15,3 +15,5 @@
 # Useful Features
 - "natural"="water" for water
 - "natural"="beach" for beaches
+- "highway"="primary" for inner city roads
+- "highway"="motorway" or "highway"="trunk" for highways

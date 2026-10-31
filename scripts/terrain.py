@@ -7,3 +7,4 @@ class Terrain(IntEnum):
     OCEAN = 0
     LAND = 1
     SAND = 2
+    HIGHWAY = 3

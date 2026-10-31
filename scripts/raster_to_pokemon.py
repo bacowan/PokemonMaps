@@ -10,13 +10,18 @@ which is then written next to each other as:
                               the stages before autotile (e.g. roads)
                      rule   - the name of the masks.json rule that picked the tile
 
+Settings are read from scripts/config.toml (copy config.sample.toml to make
+one); relative paths in it are resolved from the config file's directory.
+
 Usage:
   py -m pip install -r requirements.txt
-  py scripts/raster_to_pokemon.py <input.tif> <roads.gpkg> <output path>
+  py scripts/raster_to_pokemon.py [--config path/to/config.toml]
 """
 
 import argparse
 import json
+import tomllib
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -26,6 +31,28 @@ from rasterio.profiles import Profile
 from pipeline import build_map
 from tile import Tile
 from tilemap import Raster
+
+CONFIG_TOML = Path(__file__).parent / "config.toml"
+
+
+@dataclass(frozen=True)
+class Config:
+    raster: Path  # input .tif raster
+    roads: Path  # road lines (e.g. .gpkg), in the same CRS as the raster
+    output: Path  # output path, without extension
+
+
+def load_config(path: Path) -> Config:
+    data: dict[str, str] = tomllib.loads(path.read_text())
+    missing = [key for key in ("raster", "roads", "output") if key not in data]
+    if missing:
+        raise ValueError(f"{path} is missing: {', '.join(missing)}")
+    base = path.parent
+    return Config(
+        raster=base / data["raster"],
+        roads=base / data["roads"],
+        output=base / data["output"],
+    )
 
 
 def save(
@@ -66,21 +93,26 @@ def save(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("tif", type=Path, help="input .tif raster")
-    parser.add_argument("roads", type=Path, help="road lines (e.g. .gpkg), in the same CRS as the raster")
-    parser.add_argument("out", type=Path, help="output path, without extension (e.g. output/map)")
+    parser.add_argument("--config", type=Path, default=CONFIG_TOML, help="settings file (default: scripts/config.toml)")
     args = parser.parse_args()
 
-    if not args.tif.is_file():
-        parser.error(f"input file not found: {args.tif}")
-    if not args.roads.is_file():
-        parser.error(f"roads file not found: {args.roads}")
+    if not args.config.is_file():
+        parser.error(f"config file not found: {args.config} (copy config.sample.toml to make one)")
+    try:
+        config = load_config(args.config)
+    except (ValueError, tomllib.TOMLDecodeError) as e:
+        parser.error(str(e))
 
-    with rasterio.open(args.tif) as dataset:
-        tiles, rules, source = build_map(dataset, args.roads)
+    if not config.raster.is_file():
+        parser.error(f"input file not found: {config.raster}")
+    if not config.roads.is_file():
+        parser.error(f"roads file not found: {config.roads}")
+
+    with rasterio.open(config.raster) as dataset:
+        tiles, rules, source = build_map(dataset, config.roads)
         profile = dataset.profile
 
-    save(tiles, rules, source, profile, args.out)
+    save(tiles, rules, source, profile, config.output)
 
 
 if __name__ == "__main__":
