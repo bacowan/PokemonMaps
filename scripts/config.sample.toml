@@ -8,5 +8,8 @@ raster = "path/to/map.tif"
 # Road lines (e.g. .gpkg), in the same CRS as the raster
 roads = "path/to/roads.gpkg"
 
+# highways, same format as roads
+highways = "path/to/highways.gpkg"
+
 # Output path, without extension
 output = "output/render"
