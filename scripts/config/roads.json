@@ -1,5 +1,5 @@
 {
   "merge": {"distance": 3},
   "simplify": {"tolerance": 2},
-  "steps": {"min_straight_length": 15, "max_deviation": 4}
+  "steps": {"min_straight_length": 15, "max_deviation": 4, "width": 1}
 }

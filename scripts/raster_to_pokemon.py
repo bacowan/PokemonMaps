@@ -39,18 +39,20 @@ CONFIG_TOML = Path(__file__).parent / "config.toml"
 class Config:
     raster: Path  # input .tif raster
     roads: Path  # road lines (e.g. .gpkg), in the same CRS as the raster
+    highways: Path  # highway lines, same format as roads
     output: Path  # output path, without extension
 
 
 def load_config(path: Path) -> Config:
     data: dict[str, str] = tomllib.loads(path.read_text())
-    missing = [key for key in ("raster", "roads", "output") if key not in data]
+    missing = [key for key in ("raster", "roads", "highways", "output") if key not in data]
     if missing:
         raise ValueError(f"{path} is missing: {', '.join(missing)}")
     base = path.parent
     return Config(
         raster=base / data["raster"],
         roads=base / data["roads"],
+        highways=base / data["highways"],
         output=base / data["output"],
     )
 
@@ -107,9 +109,11 @@ def main() -> None:
         parser.error(f"input file not found: {config.raster}")
     if not config.roads.is_file():
         parser.error(f"roads file not found: {config.roads}")
+    if not config.highways.is_file():
+        parser.error(f"highways file not found: {config.highways}")
 
     with rasterio.open(config.raster) as dataset:
-        tiles, rules, source = build_map(dataset, config.roads)
+        tiles, rules, source = build_map(dataset, config.roads, config.highways)
         profile = dataset.profile
 
     save(tiles, rules, source, profile, config.output)

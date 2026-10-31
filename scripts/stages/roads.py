@@ -7,14 +7,14 @@ substages, in order:
   simplify - drop vertices the line can do without, keeping it within
              simplify.tolerance tiles of where it was
   steps    - draw each line as a staircase of horizontal and vertical runs
-             between its vertices (manhattan routing), one tile thick, with
-             as few steps as keep it within steps.max_deviation tiles of the
-             line, every run at least steps.min_straight_length tiles long
-             where possible (this wins over max_deviation)
-The config (roads.json by default) looks like:
+             between its vertices (manhattan routing), steps.width tiles
+             thick, with as few steps as keep it within steps.max_deviation
+             tiles of the line, every run at least steps.min_straight_length
+             tiles long where possible (this wins over max_deviation)
+The config (roads.json by default, highways.json for highways) looks like:
   {"merge": {"distance": 3},
    "simplify": {"tolerance": 2},
-   "steps": {"min_straight_length": 15, "max_deviation": 4}}
+   "steps": {"min_straight_length": 15, "max_deviation": 4, "width": 1}}
 
 The roads are placed on the raster's own pixel grid, so they need to be in the
 raster's CRS; reproject them first if they aren't.
@@ -40,6 +40,7 @@ from terrain import Terrain
 from tilemap import Raster
 
 ROADS_JSON = Path(__file__).parent.parent / "config" / "roads.json"
+HIGHWAYS_JSON = Path(__file__).parent.parent / "config" / "highways.json"
 # TODO: decide what a road cell becomes (e.g. a new Terrain.ROAD, which will
 # also need masks and tiles before autotile can handle it).
 ROAD_TERRAIN = Terrain.SAND
@@ -64,6 +65,7 @@ class SimplifyConfig(TypedDict):
 class StepsConfig(TypedDict):
     min_straight_length: int
     max_deviation: float
+    width: int
 
 
 class RoadConfig(TypedDict):
@@ -80,6 +82,7 @@ def load_road_config(path: Path = ROADS_JSON) -> RoadConfig:
         ("simplify", "tolerance", float, 0),
         ("steps", "min_straight_length", int, 1),
         ("steps", "max_deviation", float, 0),
+        ("steps", "width", int, 1),
     ]
     problems: list[str] = []
     for section, key, kind, minimum in checks:
@@ -217,14 +220,16 @@ def simplify_lines(lines: list[shapely.LineString], tolerance: float) -> list[sh
 def draw_steps(
     lines: list[shapely.LineString], shape: tuple[int, ...], config: StepsConfig
 ) -> NDArray[np.bool_]:
-    """Which cells of a grid of the given shape the lines' staircases pass through."""
+    """Which cells of a grid of the given shape the lines' staircases, config
+    width tiles thick, pass through."""
     roads = np.zeros(shape, dtype=np.bool_)
+    width = config["width"]
     for line in lines:
         cells = [(math.floor(y), math.floor(x)) for x, y in shapely.get_coordinates(line)]
         corners = route(cells, config["min_straight_length"], config["max_deviation"])
-        _draw_segment(roads, corners[0], corners[0])
+        _draw_segment(roads, corners[0], corners[0], width)
         for start, end in pairwise(corners):
-            _draw_segment(roads, start, end)
+            _draw_segment(roads, start, end, width)
     return roads
 
 
@@ -309,8 +314,13 @@ def _deviation(corners: list[Cell], d_row: int, d_col: int) -> float:
     return max(abs(row * d_col - col * d_row) / math.hypot(d_row, d_col) for row, col in corners)
 
 
-def _draw_segment(roads: NDArray[np.bool_], start: Cell, end: Cell) -> None:
-    """Mark the cells of a horizontal or vertical run, clipped to the grid."""
-    rows = slice(max(min(start[0], end[0]), 0), max(max(start[0], end[0]) + 1, 0))
-    cols = slice(max(min(start[1], end[1]), 0), max(max(start[1], end[1]) + 1, 0))
+def _draw_segment(roads: NDArray[np.bool_], start: Cell, end: Cell, width: int) -> None:
+    """Mark the cells of a horizontal or vertical run, clipped to the grid.
+
+    The run is swept with a width x width square, so it is width tiles thick
+    and corners stay filled; an even width puts the extra tile below / right.
+    """
+    before, after = (width - 1) // 2, width // 2
+    rows = slice(max(min(start[0], end[0]) - before, 0), max(max(start[0], end[0]) + after + 1, 0))
+    cols = slice(max(min(start[1], end[1]) - before, 0), max(max(start[1], end[1]) + after + 1, 0))
     roads[rows, cols] = True
