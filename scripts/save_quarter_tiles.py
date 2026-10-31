@@ -18,16 +18,50 @@ Usage:
 
 import argparse
 import json
+from collections.abc import Sequence
 from pathlib import Path
 
-from quarter_preview import QUARTERS, compose, load_images
-from tile import Tile
+from PIL import Image
+
+from tile import TILES_JSON, Tile
 
 type Combination = tuple[int, int, int, int]
 """The Tile value each quarter comes from, in QUARTERS order."""
 
 QUARTER_TILES_JSON = Path(__file__).parent / "config" / "quarter_tiles.json"
 DEFAULT_OUT = Path(__file__).parent / "output" / "tilesets" / "combined"
+QUARTERS = ("top_left", "top_right", "bottom_left", "bottom_right")
+"""The quarters of a tile, in the order combinations list their sources."""
+
+
+def load_images() -> dict[int, Image.Image]:
+    """Open every tile image tiles.json lists that exists, keyed by Tile value.
+
+    Unlike load_tile_images, this doesn't need every Tile in tiles.json, so a
+    combined tile can be saved before its entry is added. Combined tiles are
+    skipped until they have been written, so they can't be used as sources
+    before then.
+    """
+    data: dict[str, str] = json.loads(TILES_JSON.read_text())
+    images: dict[int, Image.Image] = {}
+    for name, path in data.items():
+        path = Path(__file__).parent / path  # tiles.json paths are relative to scripts/
+        if name in Tile.__members__ and path.exists():
+            images[Tile[name].value] = Image.open(path).convert("RGB")
+    return images
+
+
+def compose(combination: Sequence[int], images: dict[int, Image.Image]) -> Image.Image:
+    """The tile whose quarters come from the tiles in combination, in QUARTERS order."""
+    sources = [images[value] for value in combination]
+    width, height = sources[0].size
+    half_w, half_h = width // 2, height // 2
+    result = Image.new("RGB", (width, height))
+    for index, source in enumerate(sources):
+        box = ((index % 2) * half_w, (index // 2) * half_h)
+        quarter = source.crop((box[0], box[1], box[0] + half_w, box[1] + half_h))
+        result.paste(quarter, box)
+    return result
 
 
 def load_config(path: Path) -> dict[str, Combination]:

@@ -70,5 +70,17 @@
     "top_right": "OCEAN_GRASS_NE_OUTER",
     "bottom_left": "OCEAN_GRASS_NW_OUTER",
     "bottom_right": "OCEAN_GRASS_NW_OUTER"
+  },
+  "GRASS_HIGHWAY_E_S_END": {
+    "top_left": "GRASS_HIGHWAY_E",
+    "top_right": "GRASS_HIGHWAY_E_S_END_POST",
+    "bottom_left": "GRASS_HIGHWAY_E",
+    "bottom_right": "GRASS_HIGHWAY_E_S_END_POST"
+  },
+  "GRASS_HIGHWAY_W_S_END": {
+    "top_left": "GRASS_HIGHWAY_W_S_END_POST",
+    "top_right": "GRASS_HIGHWAY_W",
+    "bottom_left": "GRASS_HIGHWAY_W_S_END_POST",
+    "bottom_right": "GRASS_HIGHWAY_W_S_END_POST"
   }
 }

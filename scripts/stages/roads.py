@@ -41,9 +41,6 @@ from tilemap import Raster
 
 ROADS_JSON = Path(__file__).parent.parent / "config" / "roads.json"
 HIGHWAYS_JSON = Path(__file__).parent.parent / "config" / "highways.json"
-# TODO: decide what a road cell becomes (e.g. a new Terrain.ROAD, which will
-# also need masks and tiles before autotile can handle it).
-ROAD_TERRAIN = Terrain.SAND
 MERGE_RESOLUTION = 4
 """Pixels per tile on the grid roads are merged on."""
 
@@ -112,13 +109,15 @@ def road_lines(dataset: DatasetReader, roads_path: Path) -> list[shapely.LineStr
     return lines
 
 
-def add_roads(raster: Raster, lines: list[shapely.LineString], config: RoadConfig) -> Raster:
-    """A copy of the raster with every road drawn on; the input is left as is."""
+def add_roads(
+    raster: Raster, lines: list[shapely.LineString], config: RoadConfig, terrain: Terrain
+) -> Raster:
+    """A copy of the raster with every road drawn on as terrain; the input is left as is."""
     lines = merge_lines(lines, config["merge"]["distance"])
     lines = simplify_lines(lines, config["simplify"]["tolerance"])
     roads = draw_steps(lines, raster.shape, config["steps"])
     raster = raster.copy()
-    raster[roads] = ROAD_TERRAIN
+    raster[roads] = terrain
     return raster
 
 
